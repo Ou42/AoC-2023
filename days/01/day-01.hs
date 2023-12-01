@@ -40,61 +40,8 @@ numWords = [ "one", "two", "three"
            , "seven", "eight", "nine"
            ]
 
-go2 :: String -> Maybe Int
-go2 []    = Nothing
-go2 chars =
-  let lookUp = map (`isPrefixOf` chars) numWords
-  in  if all not lookUp
-        then go2 $ tail chars
-        else (+1) <$> elemIndex True lookUp
 
-
-findLast :: Maybe String -> Maybe Int
-findLast Nothing    = Nothing
-findLast (Just str) = go3 Nothing str
-  where
-    go3 accu []    = accu
-    go3 accu chars@(c:_) =
-      let lookUp = map (`isPrefixOf` chars) numWords
-      in  if isDigit c
-            then go3 (Just (read [c])) $ tail chars
-            else if all not lookUp
-                    then go3 accu $ tail chars
-                    else go3 ((+1) <$> elemIndex True lookUp) $ tail chars
-
-
--- using: isPrefixOf & elemIndex
-partB :: String -> Int
-partB fileStr = sum $ map go $ lines fileStr
-  where
-    go :: [Char] -> Int
-    go lineStr =
-      let (upUntilDigit, afterFirstDigit) = break isDigit lineStr
-          (firstDigit, rest) = if null afterFirstDigit
-                                  then (Nothing, Just upUntilDigit)
-                                  else ( Just $ read [head afterFirstDigit]
-                                       , Just $ tail afterFirstDigit)
-          (d1, d2, d3) = (go2 upUntilDigit, firstDigit, findLast rest)
-          tens = if null d1
-                    then fromJust d2
-                    else fromJust d1
-          ones = if null d3
-                    then tens
-                    else fromJust d3
-      in 10 * tens + ones
-
-
--- allNums :: String -> Maybe Int
-allNums :: [Char] -> [Int]
-allNums []    = []
-allNums chars@(c:rest) =
-  let lookUp = map (`isPrefixOf` chars) numWords
-  in  if isDigit c
-        then read [c] : allNums rest
-        else if all not lookUp
-          then allNums rest
-          else (+1) (fromJust (elemIndex True lookUp)) : allNums rest
-
+allNumsAsChars :: [Char] -> [[Char]]
 allNumsAsChars []    = [[]]
 allNumsAsChars chars@(c:rest) =
   let lookUp = map (`isPrefixOf` chars) numWords
@@ -104,35 +51,21 @@ allNumsAsChars chars@(c:rest) =
           then allNumsAsChars rest
           else show ((+1) (fromJust (elemIndex True lookUp))) : allNumsAsChars rest
 
--- partB2 fileStr = sum $ map go $ lines fileStr
-partB2 :: String -> Int
-partB2 fileStr = sum
+partB :: String -> Int
+partB fileStr = sum
                  $ map ( read
                          . (\ns -> [head ns, last ns])
                          . concat
-                         . allNumsAsChars ) $ lines fileStr
--- 281
--- partB2 :: String -> [Int]
--- partB2 fileStr = map ( read
---                        . (\ns -> [head ns, last ns])
---                        . concat
---                        . allNumsAsChars ) $ lines fileStr
--- [29,83,13,24,42,14,76]
--- partB2 fileStr = map ((\ns -> [head ns, last ns])
---                       . concat
---                       . allNumsAsChars) $ lines fileStr
--- ["29","83","13","24","42","14","76"]
--- partB2 fileStr = map (concat . allNumsAsChars) $ lines fileStr
--- ["219","823","123","2134","49872","18234","76"]
--- partB2 fileStr = map allNums $ lines fileStr
--- [[2,1,9],[8,2,3],[1,2,3],[2,1,3,4],[4,9,8,7,2],[1,8,2,3,4],[7,6]]
+                         . allNumsAsChars
+                       )
+                       $ lines fileStr
 
 main :: IO ()
 main = do
-  fileInputA <- readFile "input-01-part-a.test"
-  fileInputB <- readFile "input-01-part-b.test"
-  -- fileInputA <- readFile "input-01.txt"
-  -- fileInputB <- readFile "input-01.txt"
+  -- fileInputA <- readFile "input-01-part-a.test"
+  -- fileInputB <- readFile "input-01-part-b.test"
+  fileInputA <- readFile "input-01.txt"
+  fileInputB <- readFile "input-01.txt"
 
   putStrLn "Day 01 - Part A"
   putStrLn $ unlines $ take 3 $ lines fileInputA
@@ -144,13 +77,3 @@ main = do
   hr
 
   print $ "Part B = " ++ show (partB fileInputB)
-  -- "Part B = 54227" ...
-  -- "That's not the right answer; your answer is too low.
-  --  If you're stuck, make sure you're using the full input data;
-  --  there are also some general tips on the about page, or you
-  --  can ask for hints on the subreddit. Please wait one minute
-  --  before trying again. [Return to Day 1]"
-
-  hr
-
-  print $ "Part B2 = " ++ show (partB2 fileInputB)
