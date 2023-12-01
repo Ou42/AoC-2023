@@ -48,6 +48,7 @@ go2 chars =
         then go2 $ tail chars
         else (+1) <$> elemIndex True lookUp
 
+
 findLast :: Maybe String -> Maybe Int
 findLast Nothing    = Nothing
 findLast (Just str) = go3 Nothing str
@@ -82,12 +83,56 @@ partB fileStr = sum $ map go $ lines fileStr
                     else fromJust d3
       in 10 * tens + ones
 
+
+-- allNums :: String -> Maybe Int
+allNums :: [Char] -> [Int]
+allNums []    = []
+allNums chars@(c:rest) =
+  let lookUp = map (`isPrefixOf` chars) numWords
+  in  if isDigit c
+        then read [c] : allNums rest
+        else if all not lookUp
+          then allNums rest
+          else (+1) (fromJust (elemIndex True lookUp)) : allNums rest
+
+allNumsAsChars []    = [[]]
+allNumsAsChars chars@(c:rest) =
+  let lookUp = map (`isPrefixOf` chars) numWords
+  in  if isDigit c
+        then [c] : allNumsAsChars rest
+        else if all not lookUp
+          then allNumsAsChars rest
+          else show ((+1) (fromJust (elemIndex True lookUp))) : allNumsAsChars rest
+
+-- partB2 fileStr = sum $ map go $ lines fileStr
+partB2 :: String -> Int
+partB2 fileStr = sum
+                 $ map ( read
+                         . (\ns -> [head ns, last ns])
+                         . concat
+                         . allNumsAsChars ) $ lines fileStr
+-- 281
+-- partB2 :: String -> [Int]
+-- partB2 fileStr = map ( read
+--                        . (\ns -> [head ns, last ns])
+--                        . concat
+--                        . allNumsAsChars ) $ lines fileStr
+-- [29,83,13,24,42,14,76]
+-- partB2 fileStr = map ((\ns -> [head ns, last ns])
+--                       . concat
+--                       . allNumsAsChars) $ lines fileStr
+-- ["29","83","13","24","42","14","76"]
+-- partB2 fileStr = map (concat . allNumsAsChars) $ lines fileStr
+-- ["219","823","123","2134","49872","18234","76"]
+-- partB2 fileStr = map allNums $ lines fileStr
+-- [[2,1,9],[8,2,3],[1,2,3],[2,1,3,4],[4,9,8,7,2],[1,8,2,3,4],[7,6]]
+
 main :: IO ()
 main = do
-  -- fileInputA <- readFile "input-01-part-a.test"
-  -- fileInputB <- readFile "input-01-part-b.test"
-  fileInputA <- readFile "input-01.txt"
-  fileInputB <- readFile "input-01.txt"
+  fileInputA <- readFile "input-01-part-a.test"
+  fileInputB <- readFile "input-01-part-b.test"
+  -- fileInputA <- readFile "input-01.txt"
+  -- fileInputB <- readFile "input-01.txt"
 
   putStrLn "Day 01 - Part A"
   putStrLn $ unlines $ take 3 $ lines fileInputA
@@ -105,3 +150,7 @@ main = do
   --  there are also some general tips on the about page, or you
   --  can ask for hints on the subreddit. Please wait one minute
   --  before trying again. [Return to Day 1]"
+
+  hr
+
+  print $ "Part B2 = " ++ show (partB2 fileInputB)
