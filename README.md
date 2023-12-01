@@ -10,7 +10,7 @@
 
 | DAY | Part A  | Part B  | ghci    | build tool | profiling |
 | :-: | :-----: | :-----: | :-----: | :--------: | :-------: |
-| 01  |         |         |         | _          | _         |
+| 01  | &check; |         |         | _          | _         |
 
 ## Run / Build & Run Instructions:
 

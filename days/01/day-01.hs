@@ -25,8 +25,8 @@ go lineStr =
 
 main :: IO ()
 main = do
-  fileInput <- readFile "input-01.test"
-  -- fileInput <- readFile "input-01.txt"
+  -- fileInput <- readFile "input-01.test"
+  fileInput <- readFile "input-01.txt"
 
   putStrLn "Day 01 - Part A"
   putStrLn fileInput
