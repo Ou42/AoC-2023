@@ -43,7 +43,7 @@ numWords = [ "one", "two", "three"
 go2 :: String -> Maybe Int
 go2 []    = Nothing
 go2 chars =
-  let lookUp = map (\numWord -> numWord `isPrefixOf` chars) numWords
+  let lookUp = map (`isPrefixOf` chars) numWords
   in  if all not lookUp
         then go2 $ tail chars
         else (+1) <$> elemIndex True lookUp
@@ -54,7 +54,7 @@ findLast (Just str) = go3 Nothing str
   where
     go3 accu []    = accu
     go3 accu chars@(c:_) =
-      let lookUp = map (\numWord -> numWord `isPrefixOf` chars) numWords
+      let lookUp = map (`isPrefixOf` chars) numWords
       in  if isDigit c
             then go3 (Just (read [c])) $ tail chars
             else if all not lookUp
@@ -63,9 +63,8 @@ findLast (Just str) = go3 Nothing str
 
 
 -- using: isPrefixOf & elemIndex
--- partB :: String -> Int
-partB fileStr = map go $ lines fileStr
--- partB fileStr = sum $ map go $ lines fileStr
+partB :: String -> Int
+partB fileStr = sum $ map go $ lines fileStr
   where
     go :: [Char] -> Int
     go lineStr =
@@ -73,7 +72,7 @@ partB fileStr = map go $ lines fileStr
           (firstDigit, rest) = if null afterFirstDigit
                                   then (Nothing, Just upUntilDigit)
                                   else ( Just $ read [head afterFirstDigit]
-                                      , Just $ tail afterFirstDigit)
+                                       , Just $ tail afterFirstDigit)
           (d1, d2, d3) = (go2 upUntilDigit, firstDigit, findLast rest)
           tens = if null d1
                     then fromJust d2
@@ -85,10 +84,10 @@ partB fileStr = map go $ lines fileStr
 
 main :: IO ()
 main = do
-  fileInputA <- readFile "input-01-part-a.test"
-  fileInputB <- readFile "input-01-part-b.test"
-  -- fileInputA <- readFile "input-01.txt"
-  -- fileInputB <- readFile "input-01.txt"
+  -- fileInputA <- readFile "input-01-part-a.test"
+  -- fileInputB <- readFile "input-01-part-b.test"
+  fileInputA <- readFile "input-01.txt"
+  fileInputB <- readFile "input-01.txt"
 
   putStrLn "Day 01 - Part A"
   putStrLn $ unlines $ take 3 $ lines fileInputA
@@ -100,3 +99,9 @@ main = do
   hr
 
   print $ "Part B = " ++ show (partB fileInputB)
+  -- "Part B = 54227" ...
+  -- "That's not the right answer; your answer is too low.
+  --  If you're stuck, make sure you're using the full input data;
+  --  there are also some general tips on the about page, or you
+  --  can ask for hints on the subreddit. Please wait one minute
+  --  before trying again. [Return to Day 1]"
