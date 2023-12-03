@@ -24,19 +24,24 @@ type CubeKV = M.Map Colors Int
 hr :: IO ()
 hr = putStrLn $ replicate 42 '-' ++ ['\n']
 
--- parseGameStrByHand :: String -> ???
--- parseGameStrByHand = tail
-parseGameStrByHand = map (map (dropWhile (==' ')) . go ',' []) . go ';' [] . tail
-  -- where
+tuplify2 :: [a] -> (a,a)
+tuplify2 [x,y] = (y,x)
 
+-- parseGameStrByHand :: String -> ???
+parseGameStrByHand = map (map ( tuplify2
+                              . words
+                              . dropWhile (==' '))
+                              . go ',' [])
+                          . go ';' []
+                          . tail
+  where
+    go cond accu []  = accu
+    go cond accu str = (\(f,l) ->
+                        (if null l then f:accu else go cond (f:accu) (tail l)))
+                        $ break (== cond) str
 
 -- ghci> parseGameStrByHand ": 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
--- [["2 green"],["6 blue","2 green","1 red"],["4 red","3 blue"]]
-
-go cond accu []  = accu
-go cond accu str = (\(f,l) ->
-                    (if null l then f:accu else go cond (f:accu) (tail l)))
-                    $ break (== cond) str
+-- [[("green","2")],[("blue","6"),("green","2"),("red","1")],[("red","4"),("blue","3")]]
 
 parseLineByHand :: [Char] -> (Int, [Char])
 parseLineByHand = bimap (read . drop 5)
