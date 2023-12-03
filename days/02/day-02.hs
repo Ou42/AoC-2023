@@ -17,9 +17,10 @@ import qualified Data.Map as M
       - Sum the IDs of the "possible" games.
 -}
 
-data Colors = Red | Green | Blue deriving Show
+-- data Colors = Red | Green | Blue deriving (Show, Eq)
 
-type CubeKV = M.Map Colors Int
+-- type CubeKV = M.Map Colors Int
+type CubeKV = M.Map String Int
 
 hr :: IO ()
 hr = putStrLn $ replicate 42 '-' ++ ['\n']
@@ -27,13 +28,20 @@ hr = putStrLn $ replicate 42 '-' ++ ['\n']
 tuplify2 :: [a] -> (a,a)
 tuplify2 [x,y] = (y,x)
 
+-- toCubeKV :: [a] -> CubeKV
+toColorIntTuple :: [String] -> (String, Int)
+toColorIntTuple = bimap id read . tuplify2
+
 -- parseGameStrByHand :: String -> ???
-parseGameStrByHand = map (map ( tuplify2
-                              . words
-                              . dropWhile (==' '))
-                              . go ',' [])
-                          . go ';' []
-                          . tail
+parseGameStrByHand = map ( M.fromList
+                           . map ( toColorIntTuple
+                                 . words
+                                 . dropWhile (==' ')
+                                 )
+                           . go ',' []
+                         )
+                         . go ';' []
+                         . tail
   where
     go cond accu []  = accu
     go cond accu str = (\(f,l) ->
@@ -41,7 +49,7 @@ parseGameStrByHand = map (map ( tuplify2
                         $ break (== cond) str
 
 -- ghci> parseGameStrByHand ": 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
--- [[("green","2")],[("blue","6"),("green","2"),("red","1")],[("red","4"),("blue","3")]]
+-- [fromList [("green",2)],fromList [("blue",6),("green",2),("red",1)],fromList [("blue",3),("red",4)]]
 
 parseLineByHand :: [Char] -> (Int, [Char])
 parseLineByHand = bimap (read . drop 5)
