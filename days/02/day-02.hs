@@ -1,4 +1,5 @@
 module Main where
+
 import Data.Bifunctor ( Bifunctor(bimap) )
 import qualified Data.Map as M
 
@@ -28,11 +29,10 @@ hr = putStrLn $ replicate 42 '-' ++ ['\n']
 tuplify2 :: [a] -> (a,a)
 tuplify2 [x,y] = (y,x)
 
--- toCubeKV :: [a] -> CubeKV
 toColorIntTuple :: [String] -> (String, Int)
 toColorIntTuple = bimap id read . tuplify2
 
--- parseGameStrByHand :: String -> ???
+parseGameStrByHand :: [Char] -> M.Map String Int
 parseGameStrByHand = foldl (M.unionWith max) M.empty
                      . map ( M.fromList
                            . map ( toColorIntTuple
@@ -49,23 +49,32 @@ parseGameStrByHand = foldl (M.unionWith max) M.empty
                         (if null l then f:accu else go cond (f:accu) (tail l)))
                         $ break (== cond) str
 
--- ghci> parseGameStrByHand ": 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
--- fromList [("blue",6),("green",2),("red",4)]
-
-parseLineByHand :: [Char] -> (Int, [Char])
+parseLineByHand :: [Char] -> (Int, CubeKV)
 parseLineByHand = bimap (read . drop 5)
-                        tail -- parseGameStrByHand
+                        parseGameStrByHand
                         . break (== ':')
 
-parseByHand :: String -> String
+parseByHand :: String -> [(Int, CubeKV)]
 parseByHand =
-  show . map parseLineByHand . lines
+  map parseLineByHand . lines
+
+filterPartA :: CubeKV -> Bool
+filterPartA cube = cube == M.unionWith min compareCube cube
+  where
+    compareCube = M.fromList [("red",12),("green",13),("blue",14)]
+
 
 partA :: String -> IO ()
 partA filePath = do
   fileInput <- readFile filePath
   putStrLn "Day 02 - Part A"
-  putStrLn (parseByHand fileInput)
+  let games = parseByHand fileInput
+  putStrLn $ unlines $ map show $ take 5 games
+  hr
+  let filteredGames = filter (\(_, cube) -> filterPartA cube) games
+  putStrLn $ unlines $ map show $ take 5 filteredGames
+  hr
+  print $ sum $ map fst filteredGames
 
 main :: IO ()
 main = do
