@@ -1,4 +1,6 @@
 module Main where
+import Data.ByteString (fromFilePath)
+import Data.Bifunctor ( Bifunctor(bimap) )
 
 {-
     Day 02
@@ -15,16 +17,32 @@ module Main where
       - Sum the IDs of the "possible" games.
 -}
 
+data Cubes a = Red a | Green a | Blue a deriving Show
+
 hr :: IO ()
 hr = putStrLn $ replicate 42 '-' ++ ['\n']
 
+parseLineByHand :: [Char] -> (Int, [Char])
+-- parseLineByHand = break (== ':')
+-- Q: why ... `tail . break` ... and not `$`?! ===>>> A: due to eta reduction!
+parseLineByHand = bimap (read . drop 5) tail . break (== ':')
+-- parseLineByHand line = bimap (drop 5) tail $ break (== ':') line
+
+parseByHand :: String -> String
+parseByHand =
+  show . map parseLineByHand . lines
+
+partA :: String -> IO ()
+partA filePath = do
+  fileInput <- readFile filePath
+  putStrLn "Day 02 - Part A"
+  putStrLn (parseByHand fileInput)
 
 main :: IO ()
 main = do
-  fileInput <- readFile "input-01.test"
-  -- fileInput <- readFile "input-01.txt"
-
-  putStrLn "Day 02 - Part A"
-  putStrLn $ unlines $ take 3 $ lines fileInput
+  let filePath = "input-02.test"
+  -- let filePath = "input-02.txt"
 
   hr
+
+  partA filePath
