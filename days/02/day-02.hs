@@ -33,7 +33,8 @@ toColorIntTuple :: [String] -> (String, Int)
 toColorIntTuple = bimap id read . tuplify2
 
 -- parseGameStrByHand :: String -> ???
-parseGameStrByHand = map ( M.fromList
+parseGameStrByHand = foldl (M.unionWith max) M.empty
+                     . map ( M.fromList
                            . map ( toColorIntTuple
                                  . words
                                  . dropWhile (==' ')
@@ -49,7 +50,7 @@ parseGameStrByHand = map ( M.fromList
                         $ break (== cond) str
 
 -- ghci> parseGameStrByHand ": 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
--- [fromList [("green",2)],fromList [("blue",6),("green",2),("red",1)],fromList [("blue",3),("red",4)]]
+-- fromList [("blue",6),("green",2),("red",4)]
 
 parseLineByHand :: [Char] -> (Int, [Char])
 parseLineByHand = bimap (read . drop 5)
