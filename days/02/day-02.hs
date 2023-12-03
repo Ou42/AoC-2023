@@ -1,6 +1,6 @@
 module Main where
-import Data.ByteString (fromFilePath)
 import Data.Bifunctor ( Bifunctor(bimap) )
+import qualified Data.Map as M
 
 {-
     Day 02
@@ -17,16 +17,31 @@ import Data.Bifunctor ( Bifunctor(bimap) )
       - Sum the IDs of the "possible" games.
 -}
 
-data Cubes a = Red a | Green a | Blue a deriving Show
+data Colors = Red | Green | Blue deriving Show
+
+type CubeKV = M.Map Colors Int
 
 hr :: IO ()
 hr = putStrLn $ replicate 42 '-' ++ ['\n']
 
+-- parseGameStrByHand :: String -> ???
+-- parseGameStrByHand = tail
+parseGameStrByHand = map (map (dropWhile (==' ')) . go ',' []) . go ';' [] . tail
+  -- where
+
+
+-- ghci> parseGameStrByHand ": 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
+-- [["2 green"],["6 blue","2 green","1 red"],["4 red","3 blue"]]
+
+go cond accu []  = accu
+go cond accu str = (\(f,l) ->
+                    (if null l then f:accu else go cond (f:accu) (tail l)))
+                    $ break (== cond) str
+
 parseLineByHand :: [Char] -> (Int, [Char])
--- parseLineByHand = break (== ':')
--- Q: why ... `tail . break` ... and not `$`?! ===>>> A: due to eta reduction!
-parseLineByHand = bimap (read . drop 5) tail . break (== ':')
--- parseLineByHand line = bimap (drop 5) tail $ break (== ':') line
+parseLineByHand = bimap (read . drop 5)
+                        tail -- parseGameStrByHand
+                        . break (== ':')
 
 parseByHand :: String -> String
 parseByHand =
