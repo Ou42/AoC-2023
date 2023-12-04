@@ -108,8 +108,8 @@ partB filePath = do
 
 main :: IO ()
 main = do
-  let filePath = "input-02.test"
-  -- let filePath = "input-02.txt"
+  -- let filePath = "input-02.test"
+  let filePath = "input-02.txt"
 
   hr
 
