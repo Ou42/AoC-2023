@@ -16,6 +16,11 @@ import qualified Data.Map as M
       - which games would have been possible if the bag contained only:
           12 red cubes, 13 green cubes, and 14 blue cubes?
       - Sum the IDs of the "possible" games.
+
+      Part B
+      - find the "fewest number of cubes of each color" per game
+      - multiply them together ==> "power" of the set of cubes
+      - What is the sum of the "power" of these sets?
 -}
 
 -- data Colors = Red | Green | Blue deriving (Show, Eq)
@@ -74,13 +79,42 @@ partA filePath = do
   let filteredGames = filter (\(_, cube) -> filterPartA cube) games
   putStrLn $ unlines $ map show $ take 5 filteredGames
   hr
+  putStr "The sum of the IDs of valid games = "
   print $ sum $ map fst filteredGames
+
+
+padZeroPartB :: CubeKV -> CubeKV
+padZeroPartB = M.unionWith max compareCube
+  where
+    compareCube = M.fromList [("red",0),("green",0),("blue",0)]
+
+partB :: String -> IO ()
+partB filePath = do
+  fileInput <- readFile filePath
+  putStrLn "Day 02 - Part B"
+  let games = parseByHand fileInput
+  let five  = 5
+  putStrLn $ "\t...first " <> show five
+  putStrLn $ unlines $ map show $ take 5 games
+  hr
+  let powerSets = map (map (snd) . M.toList . padZeroPartB . snd) games
+  -- putStrLn $ unlines $ map show $ take 5 filteredGames
+  -- hr
+  -- putStr "The the sum of the \"power\" = "
+  putStrLn "The the \"power\" sets = "
+  putStrLn $ "\t...first " <> show five
+  putStrLn $ unlines $ map show $ take 5 powerSets
+  -- print $ sum $ map fst filteredGames
 
 main :: IO ()
 main = do
-  -- let filePath = "input-02.test"
-  let filePath = "input-02.txt"
+  let filePath = "input-02.test"
+  -- let filePath = "input-02.txt"
 
   hr
 
   partA filePath
+
+  hr
+
+  partB filePath
