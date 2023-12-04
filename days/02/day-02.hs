@@ -2,6 +2,7 @@ module Main where
 
 import Data.Bifunctor ( Bifunctor(bimap) )
 import qualified Data.Map as M
+import Data.Set (powerSet)
 
 {-
     Day 02
@@ -98,13 +99,12 @@ partB filePath = do
   putStrLn $ unlines $ map show $ take 5 games
   hr
   let powerSets = map (map (snd) . M.toList . padZeroPartB . snd) games
-  -- putStrLn $ unlines $ map show $ take 5 filteredGames
   -- hr
-  -- putStr "The the sum of the \"power\" = "
   putStrLn "The the \"power\" sets = "
   putStrLn $ "\t...first " <> show five
   putStrLn $ unlines $ map show $ take 5 powerSets
-  -- print $ sum $ map fst filteredGames
+  putStr "The the sum of the \"power\" = "
+  print $ sum $ map product powerSets
 
 main :: IO ()
 main = do
