@@ -1,5 +1,7 @@
 module Main where
 
+import Data.Char
+
 {-
     Day 03
 
@@ -19,6 +21,43 @@ partA filePath = do
   putStrLn "Day 03 - Part A"
 
   hr
+
+  -- let symbols = filter (\c -> (c /= '.') && not (isDigit c)) fileInput
+  -- let symbols = filter isSymbol fileInput
+  -- let symbols = map (filter isPunctuation) $ lines fileInput
+
+  -- let symbols = map (filter (\c -> (c /= '.') && not (isDigit c)))
+  --                   $ lines fileInput
+  let firstFew ss = unlines $ take 10 [show (i, x) | (x, i) <- zip ss [0..]]
+    
+      filterSymbols = filter (/= '.') . filter (not . isDigit)
+      symbols = map filterSymbols $ lines fileInput
+
+      filterSymbols' = (<*>) [(/= '.'), not . isDigit]
+      symbols' = map filterSymbols $ lines fileInput
+
+      filterSymbols'' = filter (not . flip elem ".0..9")
+      symbols'' = map filterSymbols $ lines fileInput
+
+  putStrLn "Symbol List:"
+  putStrLn $ firstFew symbols
+  putStrLn $ "Symbol count = " <> (show . length . concat) symbols
+
+  hr
+
+  putStrLn "Symbol' List:"
+  putStrLn $ firstFew symbols'
+  putStrLn $ "Symbol' count = " <> (show . length . concat) symbols'
+
+  hr
+
+  putStrLn "Symbol'' List:"
+  putStrLn $ firstFew symbols''
+  putStrLn $ "Symbol'' count = " <> (show . length . concat) symbols''
+
+  hr
+
+  putStrLn $ "3 Symbol's count are equal = " <> show (all (symbols ==) [symbols', symbols''])
 
   -- I'm thinking of:
   --   1. reading/parsing the input data
@@ -40,8 +79,8 @@ partA filePath = do
 
 main :: IO ()
 main = do
-  let filePath = "input-03.test"
-  -- let filePath = "input-02.txt"
+  -- let filePath = "input-03.test"
+  let filePath = "input-03.txt"
 
   hr
 
