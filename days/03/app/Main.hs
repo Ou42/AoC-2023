@@ -16,6 +16,9 @@ import qualified Data.Vector as V
 hr :: IO ()
 hr = putStrLn $ replicate 42 '-' ++ ['\n']
 
+parseA :: String -> [V.Vector Char]
+parseA fileInput = map V.fromList $ lines fileInput
+
 partA :: String -> IO ()
 partA filePath = do
   fileInput <- readFile filePath
@@ -30,7 +33,7 @@ partA filePath = do
   -- let symbols = map (filter (\c -> (c /= '.') && not (isDigit c)))
   --                   $ lines fileInput
   let firstFew ss = unlines $ take 10 [show (i, x) | (x, i) <- zip ss [0..]]
-    
+
       -- filterSymbols = filter (/= '.') . filter (not . isDigit)
       filterSymbols = filter (\c -> (c /= '.') && not (isDigit c))
       symbols = map filterSymbols $ lines fileInput
@@ -64,6 +67,10 @@ partA filePath = do
 
   -- I'm thinking of:
   --   1. reading/parsing the input data
+
+  hr
+  putStr $ unlines $ take 10 $ map show $ parseA fileInput
+
   --   2. scaning for a number
   --   3. then searching all locations around the number
   --   4. if a non `.` symbol is found, it's a "part number"
@@ -82,8 +89,8 @@ partA filePath = do
 
 main :: IO ()
 main = do
-  -- let filePath = "input-03.test"
-  let filePath = "input-03.txt"
+  let filePath = "input-03.test"
+  -- let filePath = "input-03.txt"
 
   hr
 
