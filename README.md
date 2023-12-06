@@ -5,6 +5,7 @@
 | TOOL            | VERSION | via                    | notes       |
 | :---            | :------ | :--                    | :----       |
 | GHCi            | 9.2.7   | ghci --version         | Day 01 ...  |
+| cabal           | 3.6.2.0 | cabal --version        | Day 03      |
 
 ## Completed: 
 
@@ -12,7 +13,7 @@
 | :-: | :-----: | :-----: | :-----: | :--------: | :-------: |
 | 01  | &check; | &check; | &check; | _          | _         |
 | 02  | &check; | &check; | &check; | _          | _         |
-| 03  |         |         |         | _          | _         |
+| 03  |         |         |         | cabal      | _         |
 
 ## Run / Build & Run Instructions:
 

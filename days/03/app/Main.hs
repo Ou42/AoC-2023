@@ -2,6 +2,7 @@ module Main where
 
 import Data.Char ( isDigit )
 import qualified Data.Vector as V
+import Data.List (findIndex)
 
 {-
     Day 03
@@ -19,6 +20,14 @@ hr = putStrLn $ replicate 42 '-' ++ ['\n']
 parseA :: String -> [V.Vector Char]
 parseA fileInput = map V.fromList $ lines fileInput
 
+findNum :: V.Vector Char -> (Maybe Int, Int)
+findNum vec =
+  let maybeIdx = V.findIndex isDigit vec
+  in  case maybeIdx of
+        -- Just idx -> (maybeIdx, 42)
+        Just idx -> (maybeIdx, pred . V.length . fst $ V.span isDigit (V.drop idx vec))
+        _        -> (Nothing, 0)
+
 partA :: String -> IO ()
 partA filePath = do
   fileInput <- readFile filePath
@@ -34,16 +43,8 @@ partA filePath = do
   --                   $ lines fileInput
   let firstFew ss = unlines $ take 10 [show (i, x) | (x, i) <- zip ss [0..]]
 
-      -- filterSymbols = filter (/= '.') . filter (not . isDigit)
-      filterSymbols = filter (\c -> (c /= '.') && not (isDigit c))
+      filterSymbols = filter (/= '.') . filter (not . isDigit)
       symbols = map filterSymbols $ lines fileInput
-
-      -- filterSymbols' = (<*>) [(/= '.'), not . isDigit]
-      filterSymbols' = ([(/= '.'), not . isDigit] <*>)
-      symbols' = map filterSymbols $ lines fileInput
-
-      filterSymbols'' = filter (not . flip elem ".0..9")
-      symbols'' = map filterSymbols $ lines fileInput
 
   putStrLn "Symbol List:"
   putStrLn $ firstFew symbols
@@ -51,25 +52,13 @@ partA filePath = do
 
   hr
 
-  putStrLn "Symbol' List:"
-  putStrLn $ firstFew symbols'
-  putStrLn $ "Symbol' count = " <> (show . length . concat) symbols'
-
-  hr
-
-  putStrLn "Symbol'' List:"
-  putStrLn $ firstFew symbols''
-  putStrLn $ "Symbol'' count = " <> (show . length . concat) symbols''
-
-  hr
-
-  putStrLn $ "3 Symbol's count are equal = " <> show (all (symbols ==) [symbols', symbols''])
-
   -- I'm thinking of:
   --   1. reading/parsing the input data
 
-  hr
-  putStr $ unlines $ take 10 $ map show $ parseA fileInput
+  let vecs = parseA fileInput
+  putStrLn $ unlines $ take 10 $ map show vecs
+
+  print (vecs !! 1)
 
   --   2. scaning for a number
   --   3. then searching all locations around the number
