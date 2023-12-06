@@ -2,7 +2,8 @@ module Main where
 
 import Data.Char ( isDigit )
 import qualified Data.Vector as V
-import qualified Data.List as L
+import Data.List ( (!?) )
+import Data.Maybe (catMaybes)
 
 {-
     Day 03
@@ -30,7 +31,7 @@ findNum vec =
                     in  ((maybeIdx, V.length xs), rest)
         _        -> ((Nothing, 0), V.empty)
 
--- adjSymbol :: (Int, Int) -> Int -> V.Vector Char -> Bool
+adjSymbol :: (Int, Int) -> Int -> [V.Vector Char] -> Bool
 adjSymbol (startIdx, len) lineNum vecs =
   -- ran into indexing issues using V.slice
   -- ... v.drop and V.take "clamp" to valid ranges
@@ -38,11 +39,11 @@ adjSymbol (startIdx, len) lineNum vecs =
       startIdx'  = max (startIdx - 1) 0
       len'       = if startIdx == 0 then len + 1 else len + 2
       saferSlice = V.take len' . V.drop startIdx'
-      -- the following doesn't work because base (Data.List) 4.16.x.x doesn't have (!?)
-      -- ... would need base version 4.19.x.x
-      searchVecs = [Just vec, vecs L.!? (lineNum + 1)] :: Maybe (V.Vector Char)
-  -- in  V.take len' $ V.drop startIdx' vec
-  in  searchVecs
+      -- base version 4.19 req for (!?)
+      searchVecs = catMaybes [vecs !? (lineNum - 1), Just vec, vecs !? (lineNum + 1)]
+      filterSymbols = filter (/= '.') . filter (not . isDigit)
+
+  in  not $ null $ filterSymbols $ concat $ map (V.toList . saferSlice) searchVecs
 
 partA :: String -> IO ()
 partA filePath = do
