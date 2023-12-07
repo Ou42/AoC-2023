@@ -9,7 +9,7 @@ import Data.Maybe (catMaybes)
     Day 03
 
       Part A
-      - given a 2D grid of part numbers and symbols `.` is a blank
+      - given a 2D grid of part numbers and symbols (`.` is a blank)
       - any number adjacent to a symbol is a part number
       - add up all the part numbers
 -}
@@ -31,6 +31,7 @@ findNum vec =
                     in  ((maybeIdx, V.length xs), rest)
         _        -> ((Nothing, 0), V.empty)
 
+-- check adjSymbol for 114 on line 0
 adjSymbol :: (Int, Int) -> Int -> [V.Vector Char] -> Bool
 adjSymbol (startIdx, len) lineNum vecs =
   -- ran into indexing issues using V.slice
@@ -43,7 +44,22 @@ adjSymbol (startIdx, len) lineNum vecs =
       searchVecs = catMaybes [vecs !? (lineNum - 1), Just vec, vecs !? (lineNum + 1)]
       filterSymbols = filter (/= '.') . filter (not . isDigit)
 
+  -- fmap (* 2) <$> [Just 1, Nothing, Just 3] -- does this help?
   in  not $ null $ filterSymbols $ concat $ map (V.toList . saferSlice) searchVecs
+
+checkAllNumsInLine :: V.Vector Char -> Int -> [V.Vector Char] -> [Int]
+checkAllNumsInLine vec lineNum vecs = go [] vec
+  where
+    go :: [Int] -> (V.Vector Char) -> [Int]
+    go acc vec'
+      | V.null vec' = acc
+      | otherwise   = let ((maybeIdx,len), rest) = findNum vec'
+                      in  case maybeIdx of
+                            Nothing  -> acc
+                            Just idx -> if adjSymbol (idx, len) lineNum vecs
+                                          then let numStr = V.toList $ V.slice idx len vec'
+                                               in  go (read (numStr) : acc) rest
+                                          else go acc rest
 
 partA :: String -> IO ()
 partA filePath = do
@@ -54,15 +70,6 @@ partA filePath = do
 
   let firstFew ss = unlines $ take 10 [show (i, x) | (x, i) <- zip ss [0..]]
 
-      filterSymbols = filter (/= '.') . filter (not . isDigit)
-      symbols = map filterSymbols $ lines fileInput
-
-  putStrLn "Symbol List:"
-  putStrLn $ firstFew symbols
-  putStrLn $ "Symbol count = " <> (show . length . concat) symbols
-
-  hr
-
   -- I'm thinking of:
   --   1. reading/parsing the input data
 
@@ -70,17 +77,16 @@ partA filePath = do
   putStrLn "First few vectors:"
   putStrLn $ unlines $ take 10 $ map show vecs
 
-  hr
-  putStrLn "Can Index into List of vectors:"
-  print (vecs !! 1)
-
   --   2. scaning for a number
 
   hr
+
   putStrLn "Find a number (they are still Chars) in a vector:"
   print $ findNum $ head vecs
 
   --   3. then searching all locations around the number
+
+
   --   4. if a non `.` symbol is found, it's a "part number"
   --   5. goto 2, until the whole 2D grid is processed
   --   6. sum the list of "part numbers"
