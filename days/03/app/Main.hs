@@ -55,10 +55,8 @@ hasAdjSymbol (startIdx, len) lineNum vecs =
       searchVecs = catMaybes [vecs !? (lineNum - 1), Just vec, vecs !? (lineNum + 1)]
       filterSymbols = filter (/= '.') . filter (not . isDigit)
 
-  -- fmap (* 2) <$> [Just 1, Nothing, Just 3] -- does this help?
   in  not $ null $ filterSymbols $ concat $ map (V.toList . saferSlice) searchVecs
 
--- checkAllNumsInLine :: Int -> [V.Vector Char] -> [(Int, Int)]
 checkAllNumsInLine :: Int -> [V.Vector Char] -> [Int]
 checkAllNumsInLine lineNum vecs = go vec
   where
@@ -70,9 +68,6 @@ checkAllNumsInLine lineNum vecs = go vec
       | otherwise   =
           map (\(idx', len') -> read $ V.toList $ V.slice idx' len' vec')
           $ filter (\(idx, len) -> hasAdjSymbol (idx, len) lineNum vecs) seqLst
-                                          -- then let numStr = V.toList $ V.slice idx len vec'
-                                          --      in  go (read (numStr) : acc) rest
-                                          -- else go acc rest
 
 checkAllLines :: [V.Vector Char] -> [[Int]]
 checkAllLines vecs = map go $ zip vecs [0..]
@@ -91,15 +86,6 @@ checkAllLines vecs = map go $ zip vecs [0..]
         ("......755.",[(6,3)])
         ("...$.*....",[])
         (".664.598..",[(5,3),(1,3)])
-
-        ghci> fi <- readFile "input-03.test" 
-        ghci> vecs = parseA fi
-        ghci> :t checkAllNumsInLine 
-        checkAllNumsInLine :: Int -> [V.Vector Char] -> [(Int, Int)]
-        ghci> checkAllNumsInLine 0 vecs
-        [(0,3)] <-- this is CORRECT!
-
-        *** It's working! So, far! ***
 -}
 
 partA :: String -> IO ()
@@ -115,25 +101,25 @@ partA filePath = do
   --   1. reading/parsing the input data
 
   let vecs = parseA fileInput
-  putStrLn "First few vectors:"
-  putStrLn $ unlines $ take 10 $ map show vecs
+  -- putStrLn "First few vectors:"
+  -- putStrLn $ unlines $ take 10 $ map show vecs
 
   --   2. scan for number strings in each line
 
-  hr
+  -- hr
 
-  putStrLn "Find ALL numbers (they are still Chars) in a vector:"
-  putStrLn $ unlines $ take 10 $ map show $ zip vecs $ map findNums vecs
+  -- putStrLn "Find ALL numbers (they are still Chars) in a vector:"
+  -- putStrLn $ unlines $ take 10 $ map show $ zip vecs $ map findNums vecs
 
   --   3. check all locations around each number string
   --     3a. if a non `.` / non-digit symbol is found, it's a "part number"
   --     3b. goto 3, until the whole 2D grid is processed
 
-  hr
+  -- hr
 
   let validNums = checkAllLines vecs
-  putStrLn "Valid numbers on each line:"
-  putStrLn $ unlines $ take 10 $ map show $ zip vecs validNums
+  -- putStrLn "Valid numbers on each line:"
+  -- putStrLn $ unlines $ take 10 $ map show $ zip vecs validNums
 
 {-
     Valid numbers on each line:
@@ -155,20 +141,11 @@ partA filePath = do
   putStr "Part A: Sum of all valid numbers = "
   print $ sum $ concat $ checkAllLines vecs
 
-  -- As opposed to:
-  --   - scanning for symbols and then trying to extract adjacent numbers
-
-  -- Potentially useful tools:
-  --   1. Data.Char.isPunctuation ?!
-  --   2. ghci> Data.Maybe.catMaybes [Just 6, Just 7, Nothing]
-  --      [6,7]
-  --   3. zip line [0..] to get indices
-  --   4. use Array's or a data structure that can extract a sub-sequence by indices
 
 main :: IO ()
 main = do
-  let filePath = "input-03.test"
-  -- let filePath = "input-03.txt"
+  -- let filePath = "input-03.test"
+  let filePath = "input-03.txt"
 
   hr
 
