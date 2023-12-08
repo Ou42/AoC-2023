@@ -43,8 +43,8 @@ findNums vec
                                              ++ "\n" ++ "seqLst = " ++ show seqLst
       | otherwise                    = ((currElem, 1), currElem):seqLst
 
-adjSymbol :: (Int, Int) -> Int -> [V.Vector Char] -> Bool
-adjSymbol (startIdx, len) lineNum vecs =
+hasAdjSymbol :: (Int, Int) -> Int -> [V.Vector Char] -> Bool
+hasAdjSymbol (startIdx, len) lineNum vecs =
   -- ran into indexing issues using V.slice
   -- ... v.drop and V.take "clamp" to valid ranges
   let vec        = vecs !! lineNum
@@ -58,19 +58,27 @@ adjSymbol (startIdx, len) lineNum vecs =
   -- fmap (* 2) <$> [Just 1, Nothing, Just 3] -- does this help?
   in  not $ null $ filterSymbols $ concat $ map (V.toList . saferSlice) searchVecs
 
--- checkAllNumsInLine :: Int -> [V.Vector Char] -> [Int]
-checkAllNumsInLine :: Int -> [V.Vector Char] -> [(Int, Int)]
+-- checkAllNumsInLine :: Int -> [V.Vector Char] -> [(Int, Int)]
+checkAllNumsInLine :: Int -> [V.Vector Char] -> [Int]
 checkAllNumsInLine lineNum vecs = go vec
   where
     vec    = vecs !! lineNum
     seqLst = findNums vec
-    -- go :: (V.Vector Char) -> [Int]
+    go :: (V.Vector Char) -> [Int]
     go vec'
       | V.null vec' = error "ERROR!! Empty vector!! (checkAllNumsInLine)"
-      | otherwise   = filter (\(idx, len) -> adjSymbol (idx, len) lineNum vecs) seqLst
+      | otherwise   =
+          map (\(idx', len') -> read $ V.toList $ V.slice idx' len' vec')
+          $ filter (\(idx, len) -> hasAdjSymbol (idx, len) lineNum vecs) seqLst
                                           -- then let numStr = V.toList $ V.slice idx len vec'
                                           --      in  go (read (numStr) : acc) rest
                                           -- else go acc rest
+
+checkAllLines :: [V.Vector Char] -> [[Int]]
+checkAllLines vecs = map go $ zip vecs [0..]
+  where
+    go (_, lineNum) = checkAllNumsInLine lineNum vecs
+
 {-
         Find a number (they are still Chars) in a vector:
         ("467..114..",[(5,3),(0,3)])
@@ -110,19 +118,42 @@ partA filePath = do
   putStrLn "First few vectors:"
   putStrLn $ unlines $ take 10 $ map show vecs
 
-  --   2. scaning for a number
+  --   2. scan for number strings in each line
 
   hr
 
   putStrLn "Find ALL numbers (they are still Chars) in a vector:"
   putStrLn $ unlines $ take 10 $ map show $ zip vecs $ map findNums vecs
 
-  --   3. then searching all locations around the number
+  --   3. check all locations around each number string
+  --     3a. if a non `.` / non-digit symbol is found, it's a "part number"
+  --     3b. goto 3, until the whole 2D grid is processed
 
+  hr
 
-  --   4. if a non `.` symbol is found, it's a "part number"
-  --   5. goto 2, until the whole 2D grid is processed
-  --   6. sum the list of "part numbers"
+  let validNums = checkAllLines vecs
+  putStrLn "Valid numbers on each line:"
+  putStrLn $ unlines $ take 10 $ map show $ zip vecs validNums
+
+{-
+    Valid numbers on each line:
+    ("467..114..",[467])
+    ("...*......",[])
+    ("..35..633.",[633,35])
+    ("......#...",[])
+    ("617*......",[617])
+    (".....+.58.",[])
+    ("..592.....",[592])
+    ("......755.",[755])
+    ("...$.*....",[])
+    (".664.598..",[598,664])
+-}
+
+  --   5. sum the list of "part numbers"
+
+  print $ concat $ checkAllLines vecs
+  putStr "Part A: Sum of all valid numbers = "
+  print $ sum $ concat $ checkAllLines vecs
 
   -- As opposed to:
   --   - scanning for symbols and then trying to extract adjacent numbers
