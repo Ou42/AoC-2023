@@ -21,50 +21,18 @@ hr = putStrLn $ replicate 42 '-' ++ ['\n']
 parseA :: String -> [V.Vector Char]
 parseA fileInput = map V.fromList $ lines fileInput
 
-findNum :: V.Vector Char -> ((Maybe Int, Int), V.Vector Char)
-findNum vec =
-  let maybeIdx = V.findIndex isDigit vec -- vs V.findIndices ?!
-  in  case maybeIdx of
-        Just idx -> let (xs, rest) = V.span isDigit (V.drop idx vec)
-                    -- in  ((maybeIdx, (pred . V.length) xs), rest)
-                    -- `pred` dropped as V.slice req full length
-                    in  ((maybeIdx, V.length xs), rest)
-        _        -> ((Nothing, 0), V.empty)
-
 type SeqStartIdx = Int
 type SeqLen      = Int
 type LastElem    = Int
 type CurrElem    = Int
 type Seq         = (SeqStartIdx, SeqLen)
 
-findNums :: V.Vector Char -> [((SeqStartIdx, SeqLen), LastElem)]
+findNums :: V.Vector Char -> [(SeqStartIdx, SeqLen)]
 findNums vec
   | null nums = []
-  | otherwise = foldl' go [((head nums, 1), head nums)] $ tail nums
+  | otherwise = map fst . foldl' go [((head nums, 1), head nums)] $ tail nums
   where
     nums = V.toList $ V.findIndices isDigit vec
-    -- foldl :: (a -> b -> a) -> a -> [b] -> a
-    -- answer-[2-elem-tuple] = foldl (the-func) empty-[2-elem-tuple] sorted-sequence-of-ints
-    
-    -- type 2-elem-tuple = (start-of-seq-index, length)
-    -- f ([(offset, length, last-elem)], next-integer-from-sorted-sequence-of-integers) -> [(offset, length, last-elem)]
-    -- f [(offset, length, last)] current -> [(offset, length, last)]
-
-            -- ghci> nums = [1,2,3,5,6,8,9,10]
-            -- ghci> map show nums
-            -- ["1","2","3","5","6","8","9","10"]
-            -- ghci> :t map show nums
-            -- map show nums :: [String]
-            -- ghci> concatMap show nums
-            -- "123568910"
-            -- ghci> V.fromList $ concatMap show nums
-            -- "123568910"
-            -- ghci> :t V.fromList $ concatMap show nums
-            -- V.fromList $ concatMap show nums :: V.Vector Char
-            -- ghci> findNums $ V.fromList $ concatMap show nums
-            -- [0,1,2,3,4,5,6,7,8]
-            -- ghci> :t findNums $ V.fromList $ concatMap show nums
-            -- findNums $ V.fromList $ concatMap show nums :: [Int]
 
     go :: [((SeqStartIdx, SeqLen), LastElem)] -> CurrElem -> [((SeqStartIdx, SeqLen), LastElem)]
     go seqLst@(((seqStartIdx, seqLen), lastElem):rest) currElem
@@ -74,11 +42,7 @@ findNums vec
                                              ++ "\n" ++ "currElem = " ++ show currElem
                                              ++ "\n" ++ "seqLst = " ++ show seqLst
       | otherwise                    = ((currElem, 1), currElem):seqLst
-    -- go acc _ []     = acc
-    -- go acc cnt (idx1:idx2:idxs) = undefined -- if idx1 == idx2 - 1 then go 
-    -- -- go acc cnt (idx:idxs) = 
 
--- check adjSymbol for 114 on line 0
 adjSymbol :: (Int, Int) -> Int -> [V.Vector Char] -> Bool
 adjSymbol (startIdx, len) lineNum vecs =
   -- ran into indexing issues using V.slice
@@ -94,19 +58,41 @@ adjSymbol (startIdx, len) lineNum vecs =
   -- fmap (* 2) <$> [Just 1, Nothing, Just 3] -- does this help?
   in  not $ null $ filterSymbols $ concat $ map (V.toList . saferSlice) searchVecs
 
-checkAllNumsInLine :: V.Vector Char -> Int -> [V.Vector Char] -> [Int]
-checkAllNumsInLine vec lineNum vecs = go [] vec
+-- checkAllNumsInLine :: Int -> [V.Vector Char] -> [Int]
+checkAllNumsInLine :: Int -> [V.Vector Char] -> [(Int, Int)]
+checkAllNumsInLine lineNum vecs = go vec
   where
-    go :: [Int] -> (V.Vector Char) -> [Int]
-    go acc vec'
-      | V.null vec' = acc
-      | otherwise   = let ((maybeIdx,len), rest) = findNum vec'
-                      in  case maybeIdx of
-                            Nothing  -> acc
-                            Just idx -> if adjSymbol (idx, len) lineNum vecs
-                                          then let numStr = V.toList $ V.slice idx len vec'
-                                               in  go (read (numStr) : acc) rest
-                                          else go acc rest
+    vec    = vecs !! lineNum
+    seqLst = findNums vec
+    -- go :: (V.Vector Char) -> [Int]
+    go vec'
+      | V.null vec' = error "ERROR!! Empty vector!! (checkAllNumsInLine)"
+      | otherwise   = filter (\(idx, len) -> adjSymbol (idx, len) lineNum vecs) seqLst
+                                          -- then let numStr = V.toList $ V.slice idx len vec'
+                                          --      in  go (read (numStr) : acc) rest
+                                          -- else go acc rest
+{-
+        Find a number (they are still Chars) in a vector:
+        ("467..114..",[(5,3),(0,3)])
+        ("...*......",[])
+        ("..35..633.",[(6,3),(2,2)])
+        ("......#...",[])
+        ("617*......",[(0,3)])
+        (".....+.58.",[(7,2)])
+        ("..592.....",[(2,3)])
+        ("......755.",[(6,3)])
+        ("...$.*....",[])
+        (".664.598..",[(5,3),(1,3)])
+
+        ghci> fi <- readFile "input-03.test" 
+        ghci> vecs = parseA fi
+        ghci> :t checkAllNumsInLine 
+        checkAllNumsInLine :: Int -> [V.Vector Char] -> [(Int, Int)]
+        ghci> checkAllNumsInLine 0 vecs
+        [(0,3)] <-- this is CORRECT!
+
+        *** It's working! So, far! ***
+-}
 
 partA :: String -> IO ()
 partA filePath = do
@@ -128,8 +114,8 @@ partA filePath = do
 
   hr
 
-  putStrLn "Find a number (they are still Chars) in a vector:"
-  print $ findNum $ head vecs
+  putStrLn "Find ALL numbers (they are still Chars) in a vector:"
+  putStrLn $ unlines $ take 10 $ map show $ zip vecs $ map findNums vecs
 
   --   3. then searching all locations around the number
 
