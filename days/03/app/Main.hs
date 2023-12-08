@@ -2,7 +2,7 @@ module Main where
 
 import Data.Char ( isDigit )
 import qualified Data.Vector as V
-import Data.List ( (!?) )
+import Data.List ( (!?), foldl' )
 import Data.Maybe (catMaybes)
 
 {-
@@ -23,13 +23,60 @@ parseA fileInput = map V.fromList $ lines fileInput
 
 findNum :: V.Vector Char -> ((Maybe Int, Int), V.Vector Char)
 findNum vec =
-  let maybeIdx = V.findIndex isDigit vec
+  let maybeIdx = V.findIndex isDigit vec -- vs V.findIndices ?!
   in  case maybeIdx of
         Just idx -> let (xs, rest) = V.span isDigit (V.drop idx vec)
                     -- in  ((maybeIdx, (pred . V.length) xs), rest)
                     -- `pred` dropped as V.slice req full length
                     in  ((maybeIdx, V.length xs), rest)
         _        -> ((Nothing, 0), V.empty)
+
+type SeqStartIdx = Int
+type SeqLen      = Int
+type LastElem    = Int
+type CurrElem    = Int
+type Seq         = (SeqStartIdx, SeqLen)
+
+findNums :: V.Vector Char -> [((SeqStartIdx, SeqLen), LastElem)]
+findNums vec
+  | null nums = []
+  | otherwise = foldl' go [((head nums, 1), head nums)] $ tail nums
+  where
+    nums = V.toList $ V.findIndices isDigit vec
+    -- foldl :: (a -> b -> a) -> a -> [b] -> a
+    -- answer-[2-elem-tuple] = foldl (the-func) empty-[2-elem-tuple] sorted-sequence-of-ints
+    
+    -- type 2-elem-tuple = (start-of-seq-index, length)
+    -- f ([(offset, length, last-elem)], next-integer-from-sorted-sequence-of-integers) -> [(offset, length, last-elem)]
+    -- f [(offset, length, last)] current -> [(offset, length, last)]
+
+            -- ghci> nums = [1,2,3,5,6,8,9,10]
+            -- ghci> map show nums
+            -- ["1","2","3","5","6","8","9","10"]
+            -- ghci> :t map show nums
+            -- map show nums :: [String]
+            -- ghci> concatMap show nums
+            -- "123568910"
+            -- ghci> V.fromList $ concatMap show nums
+            -- "123568910"
+            -- ghci> :t V.fromList $ concatMap show nums
+            -- V.fromList $ concatMap show nums :: V.Vector Char
+            -- ghci> findNums $ V.fromList $ concatMap show nums
+            -- [0,1,2,3,4,5,6,7,8]
+            -- ghci> :t findNums $ V.fromList $ concatMap show nums
+            -- findNums $ V.fromList $ concatMap show nums :: [Int]
+
+    go :: [((SeqStartIdx, SeqLen), LastElem)] -> CurrElem -> [((SeqStartIdx, SeqLen), LastElem)]
+    go seqLst@(((seqStartIdx, seqLen), lastElem):rest) currElem
+      | (currElem == (lastElem + 1)) = ((seqStartIdx, succ seqLen), currElem):rest
+      | (currElem <=  lastElem)      = error $ "ERROR! currElem <= lastElem! INPUT NOT ASCENDING SET!"
+                                             ++ "\n" ++ "lastElem = " ++ show lastElem
+                                             ++ "\n" ++ "currElem = " ++ show currElem
+                                             ++ "\n" ++ "seqLst = " ++ show seqLst
+      | otherwise                    = ((currElem, 1), currElem):seqLst
+    -- go acc _ []     = acc
+    -- go acc cnt (idx1:idx2:idxs) = undefined -- if idx1 == idx2 - 1 then go 
+    -- -- go acc cnt (idx:idxs) = 
 
 -- check adjSymbol for 114 on line 0
 adjSymbol :: (Int, Int) -> Int -> [V.Vector Char] -> Bool
