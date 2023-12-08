@@ -2,9 +2,11 @@
 
 ## Using Haskell, running on Linux:
 
-| TOOL            | VERSION | via                    | notes       |
-| :---            | :------ | :--                    | :----       |
-| GHCi            | 9.2.7   | ghci --version         | Day 01 ...  |
+| TOOL       | VERSION  | via             | notes       |
+| ---------- | -------- | --------------- | ----------- |
+| GHCi       | 9.2.7    | ghci --version  | Day 01 & 02 |
+| cabal      | 3.10.2.0 | cabal --version | Day 03      |
+| cabal GHCi | 9.8.1    | cabal repl      | Day 03      |
 
 ## Completed: 
 
@@ -12,7 +14,7 @@
 | :-: | :-----: | :-----: | :-----: | :--------: | :-------: |
 | 01  | &check; | &check; | &check; | _          | _         |
 | 02  | &check; | &check; | &check; | _          | _         |
-|     |         |         |         | _          | _         |
+| 03  | &check; |         |         | cabal repl | _         |
 
 ## Run / Build & Run Instructions:
 
@@ -29,13 +31,8 @@ $ ghci
 
 -- or --
 
-$ stack build
-$ stack exec dayXX-exe
-
--- or --
-
-$ stack build
-$ ./dayXX-exe
+$ cabal repl
+λ main
 
 -- or --
 
