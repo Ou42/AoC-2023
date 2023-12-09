@@ -148,6 +148,32 @@ partA filePath = do
   print $ sum $ concat validNums
 
 
+hasAdjStar :: (Int, Int) -> Int -> [V.Vector Char] -> (Bool, (Int, Int))
+hasAdjStar (startIdx, len) lineNum vecs =
+  -- ran into indexing issues using V.slice
+  -- ... v.drop and V.take "clamp" to valid ranges
+  let vec        = vecs !! lineNum
+      startIdx'  = max (startIdx - 1) 0
+      len'       = if startIdx == 0 then len + 1 else len + 2
+      saferSlice = V.take len' . V.drop startIdx'
+      -- base version 4.19 req for (!?)
+      searchVecs = catMaybes [vecs !? (lineNum - 1), Just vec, vecs !? (lineNum + 1)]
+      filterSymbols = filter (== '*')
+
+  in  (not $ null $ filterSymbols $ concat $ map (V.toList . saferSlice) searchVecs, (0,0))
+
+checkForGearsInLine :: Int -> [V.Vector Char] -> [Int]
+checkForGearsInLine lineNum vecs = go vec
+  where
+    vec    = vecs !! lineNum
+    seqLst = findNums vec
+    go :: (V.Vector Char) -> [Int]
+    go vec'
+      | V.null vec' = error "ERROR!! Empty vector!! (checkAllNumsInLine)"
+      | otherwise   =
+          map (\(idx', len') -> read $ V.toList $ V.slice idx' len' vec')
+          $ filter (\(idx, len) -> fst $ hasAdjStar (idx, len) lineNum vecs) seqLst
+
 partB :: String -> IO ()
 partB filePath = do
   fileInput <- readFile filePath
@@ -164,6 +190,12 @@ partB filePath = do
   let validNumsB = checkAllLines (filter (== '*')) vecs
   putStr "Part B | Count of Nums adj to '*' = "
   print $ length $ concat $ validNumsB
+
+  hr
+
+  putStr "Part B | Count of *'s = "
+  print $ length $ filter (== '*') fileInput
+
   -- putStr "Part B: Sum of all valid numbers = "
   -- print $ sum $ concat $ checkAllLines vecs
 
