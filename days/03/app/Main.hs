@@ -167,12 +167,14 @@ checkForGearsInLine lineNum vecs = go vec
   where
     vec    = vecs !! lineNum
     seqLst = findNums vec
-    go :: (V.Vector Char) -> [Int]
-    go vec'
-      | V.null vec' = error "ERROR!! Empty vector!! (checkAllNumsInLine)"
-      | otherwise   =
-          map (\(idx', len') -> read $ V.toList $ V.slice idx' len' vec')
-          $ filter (\(idx, len) -> fst $ hasAdjStar (idx, len) lineNum vecs) seqLst
+    -- go :: (V.Vector Char) -> [Int]
+    -- go vec'
+    --   | V.null vec' = error "ERROR!! Empty vector!! (checkAllNumsInLine)"
+    --   | otherwise   =
+    --       map (\(idx', len') -> read $ V.toList $ V.slice idx' len' vec')
+    --       $ filter (\(idx, len) -> fst $ hasAdjStar (idx, len) lineNum vecs) seqLst
+    go vec' = V.toList $ V.findIndices (== '*') vec
+
 
 partB :: String -> IO ()
 partB filePath = do
