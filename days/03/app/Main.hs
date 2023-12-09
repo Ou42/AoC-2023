@@ -12,14 +12,20 @@ import Data.Maybe (catMaybes)
       - given a 2D grid of part numbers and symbols (`.` is a blank)
       - any number adjacent to a symbol is a part number
       - add up all the part numbers
+
+      Part B
+      - now only look for numbers adjacent to *'s
+      - when a '*' has exactly 2 nums adj to it, it's called a gear
+      - multiply the 2 nums
+      - sum all the gears
 -}
 
 
 hr :: IO ()
 hr = putStrLn $ replicate 42 '-' ++ ['\n']
 
-parseA :: String -> [V.Vector Char]
-parseA fileInput = map V.fromList $ lines fileInput
+parseDay03 :: String -> [V.Vector Char]
+parseDay03 fileInput = map V.fromList $ lines fileInput
 
 type SeqStartIdx = Int
 type SeqLen      = Int
@@ -43,8 +49,8 @@ findNums vec
                                              ++ "\n" ++ "seqLst = " ++ show seqLst
       | otherwise                    = ((currElem, 1), currElem):seqLst
 
-hasAdjSymbol :: (Int, Int) -> Int -> [V.Vector Char] -> Bool
-hasAdjSymbol (startIdx, len) lineNum vecs =
+hasAdjSymbol :: ([Char] -> [Char]) -> (Int, Int) -> Int -> [V.Vector Char] -> Bool
+hasAdjSymbol filterSymbols (startIdx, len) lineNum vecs =
   -- ran into indexing issues using V.slice
   -- ... v.drop and V.take "clamp" to valid ranges
   let vec        = vecs !! lineNum
@@ -53,12 +59,12 @@ hasAdjSymbol (startIdx, len) lineNum vecs =
       saferSlice = V.take len' . V.drop startIdx'
       -- base version 4.19 req for (!?)
       searchVecs = catMaybes [vecs !? (lineNum - 1), Just vec, vecs !? (lineNum + 1)]
-      filterSymbols = filter (/= '.') . filter (not . isDigit)
+      -- filterSymbols = filter (/= '.') . filter (not . isDigit)
 
   in  not $ null $ filterSymbols $ concat $ map (V.toList . saferSlice) searchVecs
 
-checkAllNumsInLine :: Int -> [V.Vector Char] -> [Int]
-checkAllNumsInLine lineNum vecs = go vec
+checkAllNumsInLine :: ([Char] -> [Char]) -> Int -> [V.Vector Char] -> [Int]
+checkAllNumsInLine filterSymbols lineNum vecs = go vec
   where
     vec    = vecs !! lineNum
     seqLst = findNums vec
@@ -67,12 +73,12 @@ checkAllNumsInLine lineNum vecs = go vec
       | V.null vec' = error "ERROR!! Empty vector!! (checkAllNumsInLine)"
       | otherwise   =
           map (\(idx', len') -> read $ V.toList $ V.slice idx' len' vec')
-          $ filter (\(idx, len) -> hasAdjSymbol (idx, len) lineNum vecs) seqLst
+          $ filter (\(idx, len) -> hasAdjSymbol filterSymbols (idx, len) lineNum vecs) seqLst
 
-checkAllLines :: [V.Vector Char] -> [[Int]]
-checkAllLines vecs = map go $ zip vecs [0..]
+checkAllLines :: ([Char] -> [Char]) -> [V.Vector Char] -> [[Int]]
+checkAllLines filterSymbols vecs = map go $ zip vecs [0..]
   where
-    go (_, lineNum) = checkAllNumsInLine lineNum vecs
+    go (_, lineNum) = checkAllNumsInLine filterSymbols lineNum vecs
 
 {-
         Find a number (they are still Chars) in a vector:
@@ -100,7 +106,7 @@ partA filePath = do
   -- I'm thinking of:
   --   1. reading/parsing the input data
 
-  let vecs = parseA fileInput
+  let vecs = parseDay03 fileInput
   -- putStrLn "First few vectors:"
   -- putStrLn $ unlines $ take 10 $ map show vecs
 
@@ -117,7 +123,7 @@ partA filePath = do
 
   -- hr
 
-  let validNums = checkAllLines vecs
+  let validNums = checkAllLines (filter (/= '.') . filter (not . isDigit)) vecs
   -- putStrLn "Valid numbers on each line:"
   -- putStrLn $ unlines $ take 10 $ map show $ zip vecs validNums
 
@@ -137,10 +143,29 @@ partA filePath = do
 
   --   5. sum the list of "part numbers"
 
-  print $ concat $ checkAllLines vecs
+  print $ concat validNums
   putStr "Part A: Sum of all valid numbers = "
-  print $ sum $ concat $ checkAllLines vecs
+  print $ sum $ concat validNums
 
+
+partB :: String -> IO ()
+partB filePath = do
+  fileInput <- readFile filePath
+  putStrLn "Day 03 - Part B"
+
+  let vecs = parseDay03 fileInput
+
+  let validNumsA = checkAllLines (filter (/= '.') . filter (not . isDigit)) vecs
+  putStr "Part A | Count of Nums adj to symbols = "
+  print $ length $ concat $ validNumsA
+
+  hr
+
+  let validNumsB = checkAllLines (filter (== '*')) vecs
+  putStr "Part B | Count of Nums adj to '*' = "
+  print $ length $ concat $ validNumsB
+  -- putStr "Part B: Sum of all valid numbers = "
+  -- print $ sum $ concat $ checkAllLines vecs
 
 main :: IO ()
 main = do
@@ -150,3 +175,7 @@ main = do
   hr
 
   partA filePath
+
+  hr
+
+  partB filePath
