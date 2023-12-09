@@ -180,9 +180,7 @@ findGearsInLine lineNum vecs = map (findAdjNums vec) $ go vec
     go :: (V.Vector Char) -> [Int]
     go = V.toList . V.findIndices (== '*')
 
--- foldl :: Foldable t => (b -> a -> b) -> b -> t a -> b
--- findAllGears :: [V.Vector Char] -> [(Int, [V.Vector Char])]
--- findAllGears :: [V.Vector Char] -> [[V.Vector Char]]
+
 findAllGears :: [V.Vector Char] -> [[Int]]
 findAllGears vecs
   = map ( map (\x -> read (V.toList x)) ) 
@@ -231,8 +229,8 @@ partB filePath = do
 
 main :: IO ()
 main = do
-  let filePath = "input-03.test"
-  -- let filePath = "input-03.txt"
+  -- let filePath = "input-03.test"
+  let filePath = "input-03.txt"
 
   hr
 
