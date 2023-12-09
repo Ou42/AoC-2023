@@ -147,33 +147,42 @@ partA filePath = do
   putStr "Part A: Sum of all valid numbers = "
   print $ sum $ concat validNums
 
-
-hasAdjStar :: (Int, Int) -> Int -> [V.Vector Char] -> (Bool, (Int, Int))
-hasAdjStar (startIdx, len) lineNum vecs =
-  -- ran into indexing issues using V.slice
-  -- ... v.drop and V.take "clamp" to valid ranges
-  let vec        = vecs !! lineNum
-      startIdx'  = max (startIdx - 1) 0
-      len'       = if startIdx == 0 then len + 1 else len + 2
-      saferSlice = V.take len' . V.drop startIdx'
-      -- base version 4.19 req for (!?)
-      searchVecs = catMaybes [vecs !? (lineNum - 1), Just vec, vecs !? (lineNum + 1)]
-      filterSymbols = filter (== '*')
-
-  in  (not $ null $ filterSymbols $ concat $ map (V.toList . saferSlice) searchVecs, (0,0))
-
-checkForGearsInLine :: Int -> [V.Vector Char] -> [Int]
-checkForGearsInLine lineNum vecs = go vec
+findGearsInLine :: Int -> [V.Vector Char] -> [(Int, [V.Vector Char])]
+findGearsInLine lineNum vecs = map (findAdjNums vec) $ go vec
   where
     vec    = vecs !! lineNum
-    seqLst = findNums vec
-    -- go :: (V.Vector Char) -> [Int]
-    -- go vec'
-    --   | V.null vec' = error "ERROR!! Empty vector!! (checkAllNumsInLine)"
-    --   | otherwise   =
-    --       map (\(idx', len') -> read $ V.toList $ V.slice idx' len' vec')
-    --       $ filter (\(idx, len) -> fst $ hasAdjStar (idx, len) lineNum vecs) seqLst
-    go vec' = V.toList $ V.findIndices (== '*') vec
+
+    numsLeft, numsRght :: Int -> V.Vector Char -> V.Vector Char
+    numsLeft idx = V.reverse . V.takeWhile isDigit . V.reverse . V.take idx
+    numsRght idx = V.takeWhile isDigit . V.drop (idx+1)
+
+    vecsAboveAndBelow :: [V.Vector Char]
+    vecsAboveAndBelow = catMaybes [vecs !? (lineNum - 1), vecs !? (lineNum + 1)]
+
+    numsAboveAndBelow :: Int -> [V.Vector Char]
+    numsAboveAndBelow idx' = concatMap ( \vec -> splitNums $ numsLeft idx' vec
+                                                           <> V.slice idx' 1 vec
+                                                           <> numsRght idx' vec
+                                       )
+                                       vecsAboveAndBelow
+
+    splitNums :: V.Vector Char -> [V.Vector Char]
+    splitNums vecLst = 
+      let (f,s) = (V.break (not . isDigit)) vecLst
+      in  [f, V.drop 1 s]
+
+    findAdjNums :: V.Vector Char -> Int -> (Int, [V.Vector Char])
+    findAdjNums v idx = (idx, filter (not . V.null)
+                                     $ numsLeft idx v : numsRght idx v
+                                     : numsAboveAndBelow idx
+                        )
+
+    go :: (V.Vector Char) -> [Int]
+    go = V.toList . V.findIndices (== '*')
+
+-- foldl :: Foldable t => (b -> a -> b) -> b -> t a -> b
+findAllGears :: [V.Vector Char] -> [(Int, [V.Vector Char])]
+findAllGears vecs = foldl (\accu (vec, lineNum) -> accu ++ findGearsInLine lineNum vecs) [] $ zip vecs [0..]
 
 
 partB :: String -> IO ()
@@ -198,13 +207,22 @@ partB filePath = do
   putStr "Part B | Count of *'s = "
   print $ length $ filter (== '*') fileInput
 
+  hr
+
+  -- putStrLn $ unlines $ take 10 $ map show $ zip vecs $ map (flip findGearsInLine vecs) [0..(length vecs)]
+  putStrLn $ unlines $ map show $ zip vecs $ map (flip findGearsInLine vecs) [0..(length vecs)]
+
+  hr
+
+  putStrLn $ unlines $ map show $ findAllGears vecs
+
   -- putStr "Part B: Sum of all valid numbers = "
   -- print $ sum $ concat $ checkAllLines vecs
 
 main :: IO ()
 main = do
-  -- let filePath = "input-03.test"
-  let filePath = "input-03.txt"
+  let filePath = "input-03.test"
+  -- let filePath = "input-03.txt"
 
   hr
 
