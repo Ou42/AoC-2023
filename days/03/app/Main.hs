@@ -181,8 +181,15 @@ findGearsInLine lineNum vecs = map (findAdjNums vec) $ go vec
     go = V.toList . V.findIndices (== '*')
 
 -- foldl :: Foldable t => (b -> a -> b) -> b -> t a -> b
-findAllGears :: [V.Vector Char] -> [(Int, [V.Vector Char])]
-findAllGears vecs = foldl (\accu (vec, lineNum) -> accu ++ findGearsInLine lineNum vecs) [] $ zip vecs [0..]
+-- findAllGears :: [V.Vector Char] -> [(Int, [V.Vector Char])]
+-- findAllGears :: [V.Vector Char] -> [[V.Vector Char]]
+findAllGears :: [V.Vector Char] -> [[Int]]
+findAllGears vecs
+  = map ( map (\x -> read (V.toList x)) ) 
+    $ filter (\lst -> length lst == 2)
+    $ map (snd)
+    $ foldl (\accu (vec, lineNum) -> accu ++ findGearsInLine lineNum vecs)
+            [] $ zip vecs [0..]
 
 
 partB :: String -> IO ()
@@ -214,10 +221,13 @@ partB filePath = do
 
   hr
 
-  putStrLn $ unlines $ map show $ findAllGears vecs
+  let gears = findAllGears vecs
 
-  -- putStr "Part B: Sum of all valid numbers = "
-  -- print $ sum $ concat $ checkAllLines vecs
+  putStrLn "First (up to) 10 ..."
+  putStrLn $ unlines $ take 10 $ map show gears
+
+  putStr "Part B: Sum of all gears = "
+  print $ sum $ map product gears
 
 main :: IO ()
 main = do
