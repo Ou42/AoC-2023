@@ -15,6 +15,7 @@
 | 01  | &check; | &check; | &check; | _          | _         |
 | 02  | &check; | &check; | &check; | _          | _         |
 | 03  | &check; | &check; |         | cabal repl | _         |
+| 04  | &check; |         |         | cabal repl | _         |
 
 ## Run / Build & Run Instructions:
 
