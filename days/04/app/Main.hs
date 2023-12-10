@@ -18,6 +18,9 @@ import Data.Set (Set)
 -}
 type Card = ([Char], (Set Int, Set Int))
 
+hr :: IO ()
+hr = putStrLn $ replicate 42 '-' ++ ['\n']
+
 parseDay04 :: String -> [Card]
 parseDay04 fileInput =  L.map ( fmap ( go
                                      . fmap (L.drop 1)
@@ -32,11 +35,37 @@ parseDay04 fileInput =  L.map ( fmap ( go
                        , S.fromList $ L.map read $ words picked )
 
 
-partA :: [Card] -> Int
-partA = undefined
+-- partA :: [Card] -> Int
+partA :: [Card] -> [([Char], Set Int)]
+partA = L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
 
 main :: IO ()
 main = do
   fileInput <- readFile "input-04.test"
 --   fileInput <- readFile "input-04.txt"
-  putStrLn $ unlines $ L.map show $ parseDay04 fileInput
+
+  let parsedData = parseDay04 fileInput
+  putStrLn $ unlines $ L.map show parsedData
+
+  hr
+
+  putStrLn $ unlines $ L.map show $ partA parsedData
+
+{-
+        ghci> main
+        (" 1",(fromList [17,41,48,83,86],fromList [6,9,17,31,48,53,83,86]))
+        (" 2",(fromList [13,16,20,32,61],fromList [17,19,24,30,32,61,68,82]))
+        (" 3",(fromList [1,21,44,53,59],fromList [1,14,16,21,63,69,72,82]))
+        (" 4",(fromList [41,69,73,84,92],fromList [5,51,54,58,59,76,83,84]))
+        (" 5",(fromList [26,28,32,83,87],fromList [12,22,30,36,70,82,88,93]))
+        (" 6",(fromList [13,18,31,56,72],fromList [10,11,23,35,36,67,74,77]))
+
+        ------------------------------------------
+
+        (" 1",fromList [17,48,83,86])
+        (" 2",fromList [32,61])
+        (" 3",fromList [1,21])
+        (" 4",fromList [84])
+        (" 5",fromList [])
+        (" 6",fromList [])
+-}
