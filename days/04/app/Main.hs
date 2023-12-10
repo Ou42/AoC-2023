@@ -43,8 +43,8 @@ partA = sum
 
 main :: IO ()
 main = do
-  fileInput <- readFile "input-04.test"
---   fileInput <- readFile "input-04.txt"
+--   fileInput <- readFile "input-04.test"
+  fileInput <- readFile "input-04.txt"
 
   let parsedData = parseDay04 fileInput
 --   putStrLn $ unlines $ L.map show parsedData
