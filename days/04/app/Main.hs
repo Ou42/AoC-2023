@@ -35,10 +35,8 @@ parseDay04 fileInput =  L.map ( fmap ( go
                        , S.fromList $ L.map read $ words picked )
 
 
--- partA :: [Card] -> Int
--- partA :: [Card] -> [([Char], Set Int)]
 partA :: [Card] -> [([Char], Int)]
-partA = L.map (fmap (S.size))
+partA = L.map (fmap ((\pow -> 2^(pow-1)) . S.size))
         . L.filter (\(_,s) -> not $ S.null s)
         . L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
 
@@ -52,6 +50,7 @@ main = do
 
   hr
 
+--   putStr "The answer for Day 04 - Part A = "
   putStrLn $ unlines $ L.map show $ partA parsedData
 
 {-
@@ -75,6 +74,13 @@ main = do
         ------------------------------------------
 
         (" 1",4)
+        (" 2",2)
+        (" 3",2)
+        (" 4",1)
+
+        ------------------------------------------
+
+        (" 1",8)
         (" 2",2)
         (" 3",2)
         (" 4",1)
