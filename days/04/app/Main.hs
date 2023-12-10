@@ -36,8 +36,11 @@ parseDay04 fileInput =  L.map ( fmap ( go
 
 
 -- partA :: [Card] -> Int
-partA :: [Card] -> [([Char], Set Int)]
-partA = L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
+-- partA :: [Card] -> [([Char], Set Int)]
+partA :: [Card] -> [([Char], Int)]
+partA = L.map (fmap (S.size))
+        . L.filter (\(_,s) -> not $ S.null s)
+        . L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
 
 main :: IO ()
 main = do
@@ -68,4 +71,11 @@ main = do
         (" 4",fromList [84])
         (" 5",fromList [])
         (" 6",fromList [])
+
+        ------------------------------------------
+
+        (" 1",4)
+        (" 2",2)
+        (" 3",2)
+        (" 4",1)
 -}
