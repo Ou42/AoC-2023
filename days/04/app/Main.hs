@@ -15,6 +15,17 @@ import Data.Set (Set)
       - figure out which of the numbers you have appear in the list of winning numbers
       - Score 1 point for the first match, then double the points for ea match after the 1st
       - What is the total number of points?
+
+      Part B
+      - instead of points ...
+      - scratchcards only cause you to win more scratchcards
+        - equal to the number of winning numbers you have.
+      - you win copies of the scratchcards below the winning card equal to the number of matches.
+        - So, if card 10 were to have 5 matching numbers, you would win one copy each
+          of cards 11, 12, 13, 14, and 15.
+
+      - Process all of the original and copied scratchcards until no more scratchcards are won.
+        Including the original set of scratchcards, how many total scratchcards do you end up with?
 -}
 type Card = ([Char], (Set Int, Set Int))
 
@@ -41,16 +52,26 @@ partA = sum
         . L.filter (\(_,s) -> not $ S.null s)
         . L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
 
+-- partB :: [Card] -> [_]
+partB = L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
+
+
 main :: IO ()
 main = do
---   fileInput <- readFile "input-04.test"
-  fileInput <- readFile "input-04.txt"
+  fileInput <- readFile "input-04.test"
+  -- fileInput <- readFile "input-04.txt"
 
   let parsedData = parseDay04 fileInput
 --   putStrLn $ unlines $ L.map show parsedData
 
   hr
 
-  -- ... should be 13 for the test data
+  -- part A using test data: ... answer should be 13 points
   putStr "The answer for Day 04 - Part A = "
   print $ partA parsedData
+
+  -- part B using test data: ... answer should be 30 scratchcards
+  putStr "The answer for Day 04 - Part B = "
+  -- print $ partB parsedData
+
+  putStrLn $ unlines $ "\n" : (map show $ partB parsedData)

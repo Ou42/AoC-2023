@@ -5,17 +5,16 @@
 | TOOL       | VERSION  | via             | notes       |
 | ---------- | -------- | --------------- | ----------- |
 | GHCi       | 9.2.7    | ghci --version  | Day 01 & 02 |
-| cabal      | 3.10.2.0 | cabal --version | Day 03      |
-| cabal GHCi | 9.8.1    | cabal repl      | Day 03      |
+| cabal      | 3.10.2.0 | cabal --version | Day 03 - 04 |
+| cabal GHCi | 9.8.1    | cabal repl      | Day 03 - 04 |
 
 ## Completed: 
 
-| DAY | Part A  | Part B  | ghci    | build tool | profiling |
-| :-: | :-----: | :-----: | :-----: | :--------: | :-------: |
-| 01  | &check; | &check; | &check; | _          | _         |
-| 02  | &check; | &check; | &check; | _          | _         |
-| 03  | &check; | &check; |         | cabal repl | _         |
-| 04  | &check; |         |         | cabal repl | _         |
+| DAY     | Part A  | Part B  | ghci    | build tool | profiling |
+| :-----: | :-----: | :-----: | :-----: | :--------: | :-------: |
+| 01 - 02 | &check; | &check; | &check; | _          | _         |
+| 03      | &check; | &check; |         | cabal repl | _         |
+| 04      | &check; |         |         | cabal repl | _         |
 
 ## Run / Build & Run Instructions:
 
