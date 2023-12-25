@@ -1,6 +1,7 @@
 module Main where
 
 import qualified Data.List as L
+import qualified Data.Map as Map
 import qualified Data.Set as S
 import Data.Set (Set)
 
@@ -54,11 +55,14 @@ partA = sum
 
 data CardInfo = CardInfo { extra :: [Int], qty :: Int } deriving (Show)
 
--- partB :: [Card] -> [_]
-partB = L.map (\(cardNo,(win, picked)) -> let cardInt = read cardNo :: Int
-                                              extra = (cardInt+) <$> [1..length (S.intersection win picked)]
-                                              qty   = 1
-                                          in (cardInt, CardInfo extra qty ) )
+partB :: [Card] -> Map.Map Int CardInfo
+partB = -- Map.foldl' (\(CardInfo extra qty) -> undefined)
+        -- . 
+        Map.fromList
+        . L.map (\(cardNo,(win, picked)) -> let cardInt = read cardNo :: Int
+                                                extra = (cardInt+) <$> [1..length (S.intersection win picked)]
+                                                qty   = 1
+                                            in (cardInt, CardInfo extra qty ) )
 
 
 main :: IO ()
@@ -79,4 +83,4 @@ main = do
   putStr "The answer for Day 04 - Part B = "
   -- print $ partB parsedData
 
-  putStrLn $ unlines $ "\n" : (map show $ partB parsedData)
+  putStrLn $ unlines $ "\n" : (map show $ Map.toList $ partB parsedData)
