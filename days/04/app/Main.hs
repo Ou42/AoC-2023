@@ -52,8 +52,13 @@ partA = sum
         . L.filter (\(_,s) -> not $ S.null s)
         . L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
 
+data CardInfo = CardInfo { extra :: [Int], qty :: Int } deriving (Show)
+
 -- partB :: [Card] -> [_]
-partB = L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
+partB = L.map (\(cardNo,(win, picked)) -> let cardInt = read cardNo :: Int
+                                              extra = (cardInt+) <$> [1..length (S.intersection win picked)]
+                                              qty   = 1
+                                          in (cardInt, CardInfo extra qty ) )
 
 
 main :: IO ()
