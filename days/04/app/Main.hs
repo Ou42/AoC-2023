@@ -2,6 +2,7 @@ module Main where
 
 import qualified Data.List as L
 import qualified Data.Map as Map
+import Data.Map (Map)
 import qualified Data.Set as S
 import Data.Set (Set)
 
@@ -53,16 +54,21 @@ partA = sum
         . L.filter (\(_,s) -> not $ S.null s)
         . L.map (\(cardNo,(win, picked)) -> (cardNo, S.intersection win picked)) 
 
-data CardInfo = CardInfo { extra :: [Int], qty :: Int } deriving (Show)
+extraAndInstancesPartB :: [Card] -> ([[Int]], Map Int Int)
+extraAndInstancesPartB cards =
+  let (ecs, instancesLst) =
+        unzip $
+        L.map (\(cardNo,(win, picked)) -> let cardInt = read cardNo :: Int
+                                              extraCards = (cardInt+) <$> [1..length (S.intersection win picked)]
+                                          -- in (cardInt, extraCards) )
+                                          in (extraCards, 1) ) cards
+  in (ecs, Map.fromList $ flip zip instancesLst [1..])
 
-partB :: [Card] -> Map.Map Int CardInfo
-partB = -- Map.foldl' (\(CardInfo extra qty) -> undefined)
-        -- . 
-        Map.fromList
-        . L.map (\(cardNo,(win, picked)) -> let cardInt = read cardNo :: Int
-                                                extra = (cardInt+) <$> [1..length (S.intersection win picked)]
-                                                qty   = 1
-                                            in (cardInt, CardInfo extra qty ) )
+partB :: [Card] -> Map Int Int
+partB cards =
+  let (extraCardsLst, initialInstancesMap) = extraAndInstancesPartB cards
+  in L.foldl' (\instancesMap extraCards -> instancesMap)
+              initialInstancesMap extraCardsLst
 
 
 main :: IO ()
@@ -81,6 +87,7 @@ main = do
 
   -- part B using test data: ... answer should be 30 scratchcards
   putStr "The answer for Day 04 - Part B = "
-  -- print $ partB parsedData
 
-  putStrLn $ unlines $ "\n" : (map show $ Map.toList $ partB parsedData)
+  putStrLn ""
+  print $ extraAndInstancesPartB parsedData
+  print $ partB parsedData
