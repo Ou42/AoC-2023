@@ -60,14 +60,13 @@ extraAndInstancesPartB cards =
         unzip $
         L.map (\(cardNo,(win, picked)) -> let cardInt = read cardNo :: Int
                                               extraCards = (cardInt+) <$> [1..length (S.intersection win picked)]
-                                          -- in (cardInt, extraCards) )
                                           in (extraCards, 1) ) cards
   in (ecs, Map.fromList $ flip zip instancesLst [1..])
 
-partB :: [Card] -> (Int, Map Int Int)
+partB :: [Card] -> Int
 partB cards =
   let (extraCardsLst, initialInstancesMap) = extraAndInstancesPartB cards
-  in  -- snd $ 
+  in  sum $ snd $ unzip $ Map.toList $ snd $
       L.foldl' (\(key, instancesMap) extraCards ->
                   (key+1
                   , L.foldl' (\isM cardNum ->
@@ -93,6 +92,6 @@ main = do
   -- part B using test data: ... answer should be 30 scratchcards
   putStr "The answer for Day 04 - Part B = "
 
-  putStrLn ""
-  print $ extraAndInstancesPartB parsedData
+  -- putStrLn ""
+  -- print $ extraAndInstancesPartB parsedData
   print $ partB parsedData
