@@ -13,8 +13,7 @@
 | DAY     | Part A  | Part B  | ghci    | build tool | profiling |
 | :-----: | :-----: | :-----: | :-----: | :--------: | :-------: |
 | 01 - 02 | &check; | &check; | &check; | _          | _         |
-| 03      | &check; | &check; |         | cabal repl | _         |
-| 04      | &check; |         |         | cabal repl | _         |
+| 03 - 04 | &check; | &check; |         | cabal repl | _         |
 
 ## Run / Build & Run Instructions:
 
