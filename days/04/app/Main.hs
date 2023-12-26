@@ -64,11 +64,16 @@ extraAndInstancesPartB cards =
                                           in (extraCards, 1) ) cards
   in (ecs, Map.fromList $ flip zip instancesLst [1..])
 
-partB :: [Card] -> Map Int Int
+partB :: [Card] -> (Int, Map Int Int)
 partB cards =
   let (extraCardsLst, initialInstancesMap) = extraAndInstancesPartB cards
-  in L.foldl' (\instancesMap extraCards -> instancesMap)
-              initialInstancesMap extraCardsLst
+  in  -- snd $ 
+      L.foldl' (\(key, instancesMap) extraCards ->
+                  (key+1
+                  , L.foldl' (\isM cardNum ->
+                                    Map.adjust (+(isM Map.! key)) cardNum isM
+                             ) instancesMap extraCards)
+               ) (1, initialInstancesMap) extraCardsLst
 
 
 main :: IO ()
